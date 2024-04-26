@@ -1,0 +1,14 @@
+services:
+  mysql:
+    image: mysql
+    ports:
+      - "3307:3306"
+    expose:
+      - "3306"
+    environment:
+      - MYSQL_USER=quiz
+      - MYSQL_PASSWORD=quiz
+      - MYSQL_DATABASE=quiz_db
+      - MYSQL_ROOT_PASSWORD=quiz
+    volumes:
+      - "./conf.d:/etc/mysql/conf.d:ro"
