@@ -1,5 +1,6 @@
 package br.com.quizapi.service.serviceImpl;
 
+import br.com.quizapi.exceptions.ConsumeApiException;
 import br.com.quizapi.service.ConsumeAPI;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class ConsumeApiImpl implements ConsumeAPI {
             log.info("Resposta recebida da API: {}", response.statusCode());
         } catch (IOException | InterruptedException e) {
             log.error("Erro ao consumir a API: {}", e.getMessage());
-            throw new RuntimeException(e);
+            throw new ConsumeApiException("Error ao consumir a API ",e);
         }
 
         return response.body();

@@ -1,5 +1,6 @@
 package br.com.quizapi.service.serviceImpl;
 
+import br.com.quizapi.exceptions.ConsumeApiException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,7 +18,7 @@ class ConsumeApiImplTest {
     @Test
     void testConsumeAPI_WithInvalidURL() {
         ConsumeApiImpl api = new ConsumeApiImpl();
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(ConsumeApiException.class, () -> {
             api.consumeAPI("invalid-url");
         });
     }
