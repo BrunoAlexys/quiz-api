@@ -18,7 +18,7 @@ class ConsumeApiImplTest {
     @Test
     void testConsumeAPI_WithInvalidURL() {
         ConsumeApiImpl api = new ConsumeApiImpl();
-        assertThrows(ConsumeApiException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             api.consumeAPI("invalid-url");
         });
     }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -16,21 +17,23 @@ import java.net.http.HttpResponse;
 public class ConsumeApiImpl implements ConsumeAPI {
     @Override
     public String consumeAPI(String url) {
+        if (url == null || url.isEmpty()) {
+            throw new IllegalArgumentException("URL is null or empty");
+        }
         log.info("Iniciando chamada para a URL: {}", url);
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .build();
-        HttpResponse<String> response = null;
         try {
-            response = client
+            URI uri = new URI(url);
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(uri)
+                    .build();
+            HttpResponse<String> response = client
                     .send(request, HttpResponse.BodyHandlers.ofString());
             log.info("Resposta recebida da API: {}", response.statusCode());
-        } catch (IOException | InterruptedException e) {
+            return response.body();
+        } catch (IOException | InterruptedException | URISyntaxException e) {
             log.error("Erro ao consumir a API: {}", e.getMessage());
-            throw new ConsumeApiException("Error ao consumir a API ",e);
+            throw new ConsumeApiException("Erro ao consumir a API", e);
         }
-
-        return response.body();
     }
 }
