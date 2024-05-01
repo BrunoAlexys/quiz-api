@@ -1,9 +1,9 @@
 package br.com.quizapi.service.serviceImpl;
 
-import br.com.quizapi.exceptions.ConsumeApiException;
+import br.com.quizapi.model.service.serviceImpl.ConsumeApiImpl;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ConsumeApiImplTest {
 

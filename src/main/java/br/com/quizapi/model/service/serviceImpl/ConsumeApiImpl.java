@@ -1,7 +1,7 @@
-package br.com.quizapi.service.serviceImpl;
+package br.com.quizapi.model.service.serviceImpl;
 
 import br.com.quizapi.exceptions.ConsumeApiException;
-import br.com.quizapi.service.ConsumeAPI;
+import br.com.quizapi.model.service.ConsumeAPI;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
