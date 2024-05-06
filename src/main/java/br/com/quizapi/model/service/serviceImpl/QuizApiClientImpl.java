@@ -1,7 +1,7 @@
 package br.com.quizapi.model.service.serviceImpl;
 
 import br.com.quizapi.infra.exceptions.QuizApiException;
-import br.com.quizapi.model.dto.QuizApiResponse;
+import br.com.quizapi.model.dto.QuizApiResponseDTO;
 import br.com.quizapi.model.dto.QuizQuestionDTO;
 import br.com.quizapi.model.service.ConsumeAPI;
 import br.com.quizapi.model.service.ConvertData;
@@ -22,7 +22,7 @@ public class QuizApiClientImpl implements QuizApiClient {
     public List<QuizQuestionDTO> fetchQuizQuestions(String url) {
         try {
             String jsonData = consumeAPI.consumeAPI(url);
-            QuizApiResponse apiResponse = convertData.convertData(jsonData, QuizApiResponse.class);
+            QuizApiResponseDTO apiResponse = convertData.convertData(jsonData, QuizApiResponseDTO.class);
             return apiResponse.results();
         } catch (Exception e) {
             log.error("Erro ao processar a resposta da API: {}", e.getMessage());

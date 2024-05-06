@@ -2,8 +2,7 @@ package br.com.quizapi.controller;
 
 import br.com.quizapi.infra.exceptions.QuizException;
 import br.com.quizapi.model.dto.ListQuizDTO;
-import br.com.quizapi.model.dto.QuizQuestionDTO;
-import br.com.quizapi.model.dto.UpdateQuiz;
+import br.com.quizapi.model.dto.UpdateQuizDTO;
 import br.com.quizapi.model.dto.UrlDTO;
 import br.com.quizapi.model.entities.Quiz;
 import br.com.quizapi.model.service.QuizService;
@@ -44,8 +43,8 @@ public class QuizController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateQuiz(@PathVariable Long id, @RequestBody UpdateQuiz updateQuiz) {
-        this.quizService.updateQuiz(id, updateQuiz);
+    public ResponseEntity<Void> updateQuiz(@PathVariable Long id, @RequestBody UpdateQuizDTO updateQuizDTO) {
+        this.quizService.updateQuiz(id, updateQuizDTO);
         return ResponseEntity.ok().build();
     }
 

@@ -2,7 +2,7 @@ package br.com.quizapi.model.service.serviceImpl;
 
 import br.com.quizapi.infra.exceptions.QuizException;
 import br.com.quizapi.model.dto.QuizQuestionDTO;
-import br.com.quizapi.model.dto.UpdateQuiz;
+import br.com.quizapi.model.dto.UpdateQuizDTO;
 import br.com.quizapi.model.dto.UrlDTO;
 import br.com.quizapi.model.entities.IncorrectAnswer;
 import br.com.quizapi.model.entities.Quiz;
@@ -82,7 +82,7 @@ public class QuizServiceImpl implements QuizService {
 
     @Transactional
     @Override
-    public void updateQuiz(Long id,UpdateQuiz quiz) {
+    public void updateQuiz(Long id, UpdateQuizDTO quiz) {
         try {
             Optional<Quiz> quizOptional = Optional.ofNullable(this.quizRepository.findById(id)
                     .orElseThrow(() -> new QuizException("Quiz não encontrado")));

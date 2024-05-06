@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record QuizApiResponse(
+public record QuizApiResponseDTO(
         List<QuizQuestionDTO> results
 ) {
 }

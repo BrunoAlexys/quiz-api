@@ -1,6 +1,6 @@
 package br.com.quizapi.model.service;
 
-import br.com.quizapi.model.dto.UpdateQuiz;
+import br.com.quizapi.model.dto.UpdateQuizDTO;
 import br.com.quizapi.model.dto.UrlDTO;
 import br.com.quizapi.model.entities.Quiz;
 
@@ -12,6 +12,6 @@ public interface QuizService {
     List<Quiz> getQuiz();
     Optional<Quiz> getQuizById(Long id);
     void deleteQuiz(Long id);
-    void updateQuiz(Long id,UpdateQuiz quiz);
+    void updateQuiz(Long id, UpdateQuizDTO quiz);
 
 }

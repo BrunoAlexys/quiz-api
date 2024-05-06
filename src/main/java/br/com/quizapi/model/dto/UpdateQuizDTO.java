@@ -2,7 +2,7 @@ package br.com.quizapi.model.dto;
 
 import java.util.List;
 
-public record UpdateQuiz(
+public record UpdateQuizDTO(
         String type,
         String difficulty,
         String category,
