@@ -1,6 +1,6 @@
 package br.com.quizapi.model.service.serviceImpl;
 
-import br.com.quizapi.exceptions.ConsumeApiException;
+import br.com.quizapi.infra.exceptions.ConsumeApiException;
 import br.com.quizapi.model.service.ConsumeAPI;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,10 +17,12 @@ import java.net.http.HttpResponse;
 public class ConsumeApiImpl implements ConsumeAPI {
     @Override
     public String consumeAPI(String url) {
+
         if (url == null || url.isEmpty()) {
             throw new IllegalArgumentException("URL is null or empty");
         }
         log.info("Iniciando chamada para a URL: {}", url);
+
         try {
             URI uri = new URI(url);
             HttpClient client = HttpClient.newHttpClient();

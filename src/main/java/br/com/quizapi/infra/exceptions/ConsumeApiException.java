@@ -1,4 +1,4 @@
-package br.com.quizapi.exceptions;
+package br.com.quizapi.infra.exceptions;
 
 public class ConsumeApiException extends RuntimeException {
     public ConsumeApiException(String message) {
