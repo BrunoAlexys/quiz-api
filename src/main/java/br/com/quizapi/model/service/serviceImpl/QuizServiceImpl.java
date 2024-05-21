@@ -1,19 +1,19 @@
 package br.com.quizapi.model.service.serviceImpl;
 
 import br.com.quizapi.infra.exceptions.QuizException;
-import br.com.quizapi.model.dto.QuizQuestionDTO;
-import br.com.quizapi.model.dto.UpdateQuizDTO;
-import br.com.quizapi.model.dto.UrlDTO;
-import br.com.quizapi.model.entities.IncorrectAnswer;
+import br.com.quizapi.model.dto.*;
+import br.com.quizapi.model.entities.Category;
+import br.com.quizapi.model.entities.IncorrectAnswers;
 import br.com.quizapi.model.entities.Quiz;
+import br.com.quizapi.model.repository.CategoryRepository;
 import br.com.quizapi.model.repository.QuizRepository;
-import br.com.quizapi.model.service.QuizApiClient;
 import br.com.quizapi.model.service.QuizService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,22 +27,20 @@ public class QuizServiceImpl implements QuizService {
     private static final String URL = "https://opentdb.com/api.php?";
 
     private final QuizRepository quizRepository;
-    private final QuizApiClient quizApiClient;
+    private final CategoryRepository categoryRepository;
 
     @Transactional
     @Override
-    public void saveQuiz(UrlDTO url) {
+    public void saveQuiz(SearchDataDTO url) {
         try {
             log.info("Iniciando busca de dados da API: {}", url);
             String apiUrl = buildApiUrl(url);
             log.debug("API URL: {}", apiUrl);
 
-            List<QuizQuestionDTO> questions = fetchQuizQuestions(apiUrl);
-            List<Quiz> quizList = mapQuestionsToQuizEntities(questions);
-
-            saveQuizEntities(quizList);
-
-            log.info("Quiz salvo com sucesso.");
+            RestTemplate template = new RestTemplate();
+            QuizApiResponseDTO response = template.getForObject(apiUrl, QuizApiResponseDTO.class);
+            List<Quiz> quizList = mapQuestionsToQuizEntities(response.results());
+            this.quizRepository.saveAll(quizList);
         } catch (DataAccessException e) {
             log.error("Erro ao buscar ou salvar dados do quiz: {}", e.getMessage());
             throw new QuizException("Erro ao buscar ou salvar dados do quiz", e);
@@ -50,9 +48,12 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public List<Quiz> getQuiz() {
+    public List<ListQuizDTO> getQuiz() {
         try {
-            return this.quizRepository.findAll();
+            List<Quiz> quizList = this.quizRepository.findAll();
+            return quizList.stream()
+                    .map(ListQuizDTO::new)
+                    .toList();
         } catch (DataAccessException e) {
             log.error("Erro ao buscar dados do quiz: {}", e.getMessage());
             throw new QuizException("Erro ao buscar dados do quiz", e);
@@ -60,89 +61,74 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public Optional<Quiz> getQuizById(Long id) {
+    public List<ListQuestion> getQuestions(SearchDataDTO searchDataDTO) {
         try {
-            return this.quizRepository.findById(id);
-        } catch (DataAccessException e) {
+            int numberQuestions = searchDataDTO.amount();
+            List<Quiz> quizList = this.quizRepository
+                    .searchQuestions(searchDataDTO,numberQuestions);
+            return quizList.stream()
+                    .map(ListQuestion::new)
+                    .toList();
+        }catch (Exception e) {
             log.error("Erro ao buscar dados do quiz: {}", e.getMessage());
             throw new QuizException("Erro ao buscar dados do quiz", e);
         }
     }
 
-    @Transactional
     @Override
-    public void deleteQuiz(Long id) {
+    public List<ListQuizDTO> searchQuestions(SearchDataDTO searchDataDTO) {
         try {
-            this.quizRepository.deleteById(id);
-        } catch (DataAccessException e) {
-            log.error("Erro ao deletar dados do quiz: {}", e.getMessage());
-            throw new QuizException("Erro ao deletar dados do quiz", e);
+            int numberQuestions = searchDataDTO.amount();
+            List<Quiz> quizList = this.quizRepository
+                    .searchQuestions(searchDataDTO,numberQuestions);
+            return quizList.stream()
+                    .map(ListQuizDTO::new)
+                    .toList();
+        }catch (Exception e) {
+            log.error("Erro ao buscar dados do quiz: {}", e.getMessage());
+            throw new QuizException("Erro ao buscar dados do quiz", e);
         }
     }
 
-    @Transactional
     @Override
-    public void updateQuiz(Long id, UpdateQuizDTO quiz) {
-        try {
-            Optional<Quiz> quizOptional = Optional.ofNullable(this.quizRepository.findById(id)
-                    .orElseThrow(() -> new QuizException("Quiz não encontrado")));
-            var quizEntity = quizOptional.get();
-            if(quiz.category() != null) {
-                quizEntity.setCategory(quiz.category());
-            }
-            if(quiz.type() != null) {
-                quizEntity.setType(quiz.type());
-            }
-            if(quiz.difficulty() != null) {
-                quizEntity.setDifficulty(quiz.difficulty());
-            }
-            if(quiz.question() != null) {
-                quizEntity.setQuestion(quiz.question());
-            }
-            if(quiz.correctAnswer() != null) {
-                quizEntity.setCorrectAnswer(quiz.correctAnswer());
-            }
-
-        } catch (DataAccessException e) {
-            log.error("Erro ao atualizar dados do quiz: {}", e.getMessage());
-            throw new QuizException("Erro ao atualizar dados do quiz", e);
-        }
+    public List<CategoryDTO> getCategory() {
+        return categoryRepository.findAll().stream().map(CategoryDTO::new).toList();
     }
 
-    private String buildApiUrl(UrlDTO url) {
-        return URL + "amount=" + url.amount() + "&category=" + url.category() + "&difficulty=" + url.difficulty() + "&type=" + url.type();
-    }
-
-
-    private List<QuizQuestionDTO> fetchQuizQuestions(String apiUrl) {
-        log.info("Buscando dados da API: {}", apiUrl);
-        return quizApiClient.fetchQuizQuestions(apiUrl);
+    private String buildApiUrl(SearchDataDTO url) {
+        return URL + "amount=" + url.amount() + "&category=" + url.category() + "&difficulty=" + url.difficulty() + "&type=multiple";
     }
 
     private List<Quiz> mapQuestionsToQuizEntities(List<QuizQuestionDTO> questions) {
+        log.info("Mapeando dados para entidades de quiz: {}", questions);
         return questions.stream().map(quizQuestionDTO -> {
             Quiz quiz = new Quiz();
-            quiz.setCategory(quizQuestionDTO.category());
-            quiz.setType(quizQuestionDTO.type());
+            Optional<Category> category = categoryRepository.findByName(quizQuestionDTO.category());
+
+            if (category.isEmpty()) {
+                Category newCategory = new Category();
+                newCategory.setName(quizQuestionDTO.category());
+                category = Optional.of(categoryRepository.save(newCategory));
+            }
+
+            quiz.setCategory(category.get());
             quiz.setDifficulty(quizQuestionDTO.difficulty());
             quiz.setQuestion(quizQuestionDTO.question());
             quiz.setCorrectAnswer(quizQuestionDTO.correctAnswer());
             quiz.setIncorrectAnswers(mapToIncorrectAnswers(quiz, quizQuestionDTO.incorrectAnswers()));
+            log.info("Quiz mapeado: {}", quiz);
             return quiz;
         }).collect(Collectors.toList());
     }
 
-    private List<IncorrectAnswer> mapToIncorrectAnswers(Quiz quiz, List<String> incorrectAnswers) {
+    private List<IncorrectAnswers> mapToIncorrectAnswers(Quiz quiz, List<String> incorrectAnswers) {
+        log.info("Mapeando respostas incorretas para entidades de quiz: {}", incorrectAnswers);
         return incorrectAnswers.stream().map(incorrectAnswer -> {
-            IncorrectAnswer incorrectAnswerEntity = new IncorrectAnswer();
-            incorrectAnswerEntity.setQuiz(quiz);
-            incorrectAnswerEntity.setIncorrectAnswer(incorrectAnswer);
-            return incorrectAnswerEntity;
+            IncorrectAnswers incorrectAnswersEntity = new IncorrectAnswers();
+            incorrectAnswersEntity.setQuiz(quiz);
+            incorrectAnswersEntity.setIncorrectAnswer(incorrectAnswer);
+            log.info("Resposta incorreta mapeada: {}", incorrectAnswersEntity);
+            return incorrectAnswersEntity;
         }).collect(Collectors.toList());
-    }
-
-    private void saveQuizEntities(List<Quiz> quizList) {
-        log.info("Salvando quiz no banco de dados: {}", quizList);
-        quizRepository.saveAll(quizList);
     }
 }

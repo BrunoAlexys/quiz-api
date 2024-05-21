@@ -1,14 +1,13 @@
 services:
-  mysql:
-    image: mysql
+  postgres:
+    image: postgres
     ports:
-      - "3307:3306"
+      - "5432:5432"
     expose:
-      - "3306"
+      - "5432"
     environment:
-      - MYSQL_USER=quiz
-      - MYSQL_PASSWORD=quiz
-      - MYSQL_DATABASE=quiz_db
-      - MYSQL_ROOT_PASSWORD=quiz
+      - POSTGRES_USER=quiz
+      - POSTGRES_PASSWORD=quiz
+      - POSTGRES_DB=quiz_db
     volumes:
-      - "./conf.d:/etc/mysql/conf.d:ro"
+      - "./conf.d:/etc/postgres/conf.d:ro"

@@ -1,13 +1,11 @@
 package br.com.quizapi.controller;
 
-import br.com.quizapi.infra.exceptions.QuizException;
+import br.com.quizapi.model.dto.CategoryDTO;
+import br.com.quizapi.model.dto.ListQuestion;
 import br.com.quizapi.model.dto.ListQuizDTO;
-import br.com.quizapi.model.dto.UpdateQuizDTO;
-import br.com.quizapi.model.dto.UrlDTO;
-import br.com.quizapi.model.entities.Quiz;
+import br.com.quizapi.model.dto.SearchDataDTO;
 import br.com.quizapi.model.service.QuizService;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,41 +14,37 @@ import java.util.List;
 @RestController
 @RequestMapping("/quiz")
 @AllArgsConstructor
+@CrossOrigin("http://localhost:4200/")
 public class QuizController {
 
     private final QuizService quizService;
 
     @PostMapping
-    public ResponseEntity<Void> saveQuiz(@RequestBody UrlDTO url) {
+    public ResponseEntity<Void> saveQuiz(@RequestBody SearchDataDTO url) {
         this.quizService.saveQuiz(url);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping
     public ResponseEntity<List<ListQuizDTO>> getQuiz() {
-        List<Quiz> quiz = this.quizService.getQuiz();
-        List<ListQuizDTO> quizQuestionDTOList = quiz.stream()
-                .map(ListQuizDTO::new)
-                .toList();
+        List<ListQuizDTO> quizQuestionDTOList = this.quizService.getQuiz();
         return ResponseEntity.ok(quizQuestionDTOList);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ListQuizDTO> getById(@PathVariable Long id) {
-        var quiz = this.quizService.getQuizById(id)
-                .orElseThrow(() -> new QuizException("Quiz não encontrado"));
-        return ResponseEntity.ok(new ListQuizDTO(quiz));
+    @PostMapping("/search")
+    public ResponseEntity<List<ListQuizDTO>> searchQuestions(@RequestBody SearchDataDTO searchDataDTO) {
+        List<ListQuizDTO> quizQuestionDTOList = this.quizService.searchQuestions(searchDataDTO);
+        return ResponseEntity.ok(quizQuestionDTOList);
+    }
+    @PostMapping("/perguntas")
+    public ResponseEntity<List<ListQuestion>> getQuestions(@RequestBody SearchDataDTO searchDataDTO) {
+        List<ListQuestion> quizQuestionDTOList = this.quizService.getQuestions(searchDataDTO);
+        return ResponseEntity.ok(quizQuestionDTOList);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> updateQuiz(@PathVariable Long id, @RequestBody UpdateQuizDTO updateQuizDTO) {
-        this.quizService.updateQuiz(id, updateQuizDTO);
-        return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteQuiz(@PathVariable Long id) {
-        this.quizService.deleteQuiz(id);
-        return ResponseEntity.ok().build();
+    @GetMapping("/category")
+    public ResponseEntity<List<CategoryDTO>> getByCategory() {
+        List<CategoryDTO> categoryList = this.quizService.getCategory();
+        return ResponseEntity.ok(categoryList);
     }
 }

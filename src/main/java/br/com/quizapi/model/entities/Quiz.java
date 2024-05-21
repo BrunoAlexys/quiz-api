@@ -10,6 +10,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "tb_quiz")
+@NoArgsConstructor
 @Getter
 @Setter
 @ToString
@@ -17,11 +18,11 @@ public class Quiz {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String type;
     private String difficulty;
-    private String category;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Category category;
     private String question;
     private String correctAnswer;
-    @OneToMany(mappedBy = "quiz", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<IncorrectAnswer> incorrectAnswers;
+    @OneToMany(mappedBy = "quiz",fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<IncorrectAnswers> incorrectAnswers;
 }
