@@ -6,6 +6,7 @@ import br.com.quizapi.model.dto.ListQuizDTO;
 import br.com.quizapi.model.dto.SearchDataDTO;
 import br.com.quizapi.model.service.QuizService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +15,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/quiz")
 @AllArgsConstructor
-@CrossOrigin("http://localhost:4200/")
 public class QuizController {
 
     private final QuizService quizService;
@@ -22,7 +22,7 @@ public class QuizController {
     @PostMapping
     public ResponseEntity<Void> saveQuiz(@RequestBody SearchDataDTO url) {
         this.quizService.saveQuiz(url);
-        return ResponseEntity.ok().build();
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping
