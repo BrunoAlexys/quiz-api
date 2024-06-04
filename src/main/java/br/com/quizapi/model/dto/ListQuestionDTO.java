@@ -5,13 +5,13 @@ import br.com.quizapi.model.entities.Quiz;
 
 import java.util.List;
 
-public record ListQuestion(
+public record ListQuestionDTO(
         Long id,
         String question,
         String correctAnswer,
         List<String> incorrectAnswers
 ) {
-    public ListQuestion(Quiz quiz) {
+    public ListQuestionDTO(Quiz quiz) {
         this(quiz.getId(), quiz.getQuestion(), quiz.getCorrectAnswer(),
                 List.of(String.valueOf(quiz.getIncorrectAnswers().stream()
                         .map(IncorrectAnswers::getIncorrectAnswer)

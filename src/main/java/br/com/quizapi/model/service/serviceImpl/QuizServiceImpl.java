@@ -1,6 +1,6 @@
 package br.com.quizapi.model.service.serviceImpl;
 
-import br.com.quizapi.infra.exceptions.QuizException;
+import br.com.quizapi.infra.exceptions.QuizNotFoundException;
 import br.com.quizapi.model.dto.*;
 import br.com.quizapi.model.entities.Category;
 import br.com.quizapi.model.entities.IncorrectAnswers;
@@ -41,9 +41,10 @@ public class QuizServiceImpl implements QuizService {
             QuizApiResponseDTO response = template.getForObject(apiUrl, QuizApiResponseDTO.class);
             List<Quiz> quizList = mapQuestionsToQuizEntities(response.results());
             this.quizRepository.saveAll(quizList);
-        } catch (DataAccessException e) {
+            log.info("Quiz salvo com sucesso!");
+        } catch (Exception e) {
             log.error("Erro ao buscar ou salvar dados do quiz: {}", e.getMessage());
-            throw new QuizException("Erro ao buscar ou salvar dados do quiz", e);
+            throw new QuizNotFoundException("Erro ao buscar ou salvar dados do quiz", e);
         }
     }
 
@@ -54,39 +55,27 @@ public class QuizServiceImpl implements QuizService {
             return quizList.stream()
                     .map(ListQuizDTO::new)
                     .toList();
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             log.error("Erro ao buscar dados do quiz: {}", e.getMessage());
-            throw new QuizException("Erro ao buscar dados do quiz", e);
+            throw new QuizNotFoundException("Erro ao buscar dados do quiz", e);
         }
     }
 
     @Override
-    public List<ListQuestion> getQuestions(SearchDataDTO searchDataDTO) {
+    public List<ListQuestionDTO> getQuestions(int amount, String category, String difficulty) {
         try {
-            int numberQuestions = searchDataDTO.amount();
             List<Quiz> quizList = this.quizRepository
-                    .searchQuestions(searchDataDTO,numberQuestions);
+                    .searchQuestions(amount, category, difficulty);
+            if (quizList.isEmpty()) {
+                log.error("Nenhuma pergunta encontrada");
+                throw new QuizNotFoundException("Nenhuma pergunta encontrada");
+            }
             return quizList.stream()
-                    .map(ListQuestion::new)
+                    .map(ListQuestionDTO::new)
                     .toList();
         }catch (Exception e) {
             log.error("Erro ao buscar dados do quiz: {}", e.getMessage());
-            throw new QuizException("Erro ao buscar dados do quiz", e);
-        }
-    }
-
-    @Override
-    public List<ListQuizDTO> searchQuestions(SearchDataDTO searchDataDTO) {
-        try {
-            int numberQuestions = searchDataDTO.amount();
-            List<Quiz> quizList = this.quizRepository
-                    .searchQuestions(searchDataDTO,numberQuestions);
-            return quizList.stream()
-                    .map(ListQuizDTO::new)
-                    .toList();
-        }catch (Exception e) {
-            log.error("Erro ao buscar dados do quiz: {}", e.getMessage());
-            throw new QuizException("Erro ao buscar dados do quiz", e);
+            throw new QuizNotFoundException("Erro ao buscar dados do quiz", e);
         }
     }
 
